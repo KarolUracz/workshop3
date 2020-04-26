@@ -4,6 +4,7 @@ import pl.coderslab.dao.SolutionDao;
 import pl.coderslab.model.Solution;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Scanner;
 
 public class UserInterface {
@@ -18,11 +19,11 @@ public class UserInterface {
             switch (option) {
                 case "add":
                     Solution solution = new Solution();
-                    Solution[] solutions = solutionDao.findAllSolutionsByUserId(userId);
+                    List<Solution> solutions = solutionDao.findAllSolutionsByUserId(userId);
                     for (Solution sol : solutions) {
                         System.out.println(sol);
                     }
-                    Solution[] sols = solutionDao.findAllExercisesWithoutSolution(userId);
+                    List<Solution> sols = solutionDao.findAllExercisesWithoutSolution(userId);
                     for (Solution solution1 : sols) {
                         System.out.println(sols);
                     }
@@ -41,7 +42,7 @@ public class UserInterface {
                     solutionDao.updateSolution(toUpdate);
                     break;
                 case "view":
-                    Solution[] solutions1 = solutionDao.findAllSolutionsByUserId(userId);
+                    List<Solution> solutions1 = solutionDao.findAllSolutionsByUserId(userId);
                     for (Solution solution1: solutions1) {
                         System.out.println(solution1);
                     }

@@ -1,0 +1,3 @@
+<footer>
+    Autor: Karol
+</footer>

@@ -7,6 +7,24 @@ public class Solution {
     private String description;
     private Integer exercise_id;
     private Integer user_id;
+    private String exerciseTitle;
+    private String username;
+
+    public String getExerciseTitle() {
+        return exerciseTitle;
+    }
+
+    public void setExerciseTitle(String exerciseTitle) {
+        this.exerciseTitle = exerciseTitle;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public Solution(){}
 

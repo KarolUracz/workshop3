@@ -4,7 +4,9 @@ import pl.coderslab.db.DBUtil;
 import pl.coderslab.model.User;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class UserDao {
     private static final String CREATE_USER_QUERY = "INSERT INTO users (username, email, password, group_id) VALUES (?,?,?,?)";
@@ -77,9 +79,9 @@ public class UserDao {
         }
     }
 
-    public User[] findAllUsers() {
+    public List<User> findAllUsers() {
         try (Connection conn = DBUtil.getConnection()) {
-            User[] users = new User[0];
+            List<User> users = new ArrayList<>();
             PreparedStatement statement = conn.prepareStatement(FIND_ALL_USERS_QUERY);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -88,7 +90,7 @@ public class UserDao {
                 user.setUsername(resultSet.getString("username"));
                 user.setPassword(resultSet.getString("password"));
                 user.setGroup_id(resultSet.getInt("group_id"));
-                users = addToArray(user, users);
+                users.add(user);
             }
             return users;
         } catch (SQLException e) {
@@ -97,8 +99,8 @@ public class UserDao {
         }
     }
 
-    public User[] findAllByGroupId(int groupId) {
-        User[] users = new User[0];
+    public List<User> findAllByGroupId(int groupId) {
+        List<User> users = new ArrayList<>();
         User user = new User();
         try (Connection connection = DBUtil.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(FIND_ALL_BY_GROUP_ID_QUERY);
@@ -110,7 +112,7 @@ public class UserDao {
                 user.setEmail(resultSet.getString("email"));
                 user.setPassword(resultSet.getString("password"));
                 user.setGroup_id(resultSet.getInt("group_id"));
-                users = addToArray(user, users);
+                users.add(user);
             }
             return users;
         } catch (SQLException e) {
@@ -119,9 +121,9 @@ public class UserDao {
         }
     }
 
-    private User[] addToArray(User g, User[] users) {
-        User[] tmpUsers = Arrays.copyOf(users, users.length + 1);
-        tmpUsers[users.length] = g;
-        return tmpUsers;
-    }
+//    private User[] addToArray(User g, User[] users) {
+//        User[] tmpUsers = Arrays.copyOf(users, users.length + 1);
+//        tmpUsers[users.length] = g;
+//        return tmpUsers;
+//    }
 }

@@ -4,7 +4,8 @@ import pl.coderslab.db.DBUtil;
 import pl.coderslab.model.Solution;
 
 import java.sql.*;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SolutionDao {
     private static final String CREATE_SOLUTION_QUERY = "INSERT INTO solutions(created, updated, description,exercise_id, user_id) VALUES (?,?,?,?,?)";
@@ -15,6 +16,11 @@ public class SolutionDao {
     private static final String FIND_ALL_SOLUTIONS_BY_USER_ID_QUERY = "SELECT * FROM solutions WHERE user_id = ?";
     private static final String FIND_ALL_BY_EXERCISE_ID_QUERY = "SELECT * FROM solutions WHERE exercise_id = ? ORDER BY created ASC ";
     private static final String FIND_ALL_EXERCISES_WITHOUT_SOLUTION_QUERY = "SELECT * FROM solutions WHERE user_id = ? AND description IS NULL";
+    private static final String FIND_RECENT_SOLUTIONS_QUERY = "SELECT solutions.*, users.username, exercises.title " +
+            "FROM " +
+            "solutions INNER JOIN users On solutions.user_id = users.id " +
+            "INNER JOIN exercises ON solutions.exercise_id = exercises.id" +
+            " ORDER BY created DESC LIMIT ?";
 
     public Solution readSolution(int solution_id) {
         try (Connection conn = DBUtil.getConnection()) {
@@ -82,9 +88,9 @@ public class SolutionDao {
         }
     }
 
-    public Solution[] findAllSolutions() {
+    public List<Solution> findAllSolutions() {
         try (Connection conn = DBUtil.getConnection()) {
-            Solution[] solutions = new Solution[0];
+            List<Solution> solutions = new ArrayList<>();
             PreparedStatement statement = conn.prepareStatement(FIND_ALL_SOLUTIONS_QUERY);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -95,7 +101,7 @@ public class SolutionDao {
                 solution.setDescription(resultSet.getString("description"));
                 solution.setExercise_id(resultSet.getInt("exercise_id"));
                 solution.setUser_id(resultSet.getInt("user_id"));
-                solutions = addToArray(solution, solutions);
+                solutions.add(solution);
             }
             return solutions;
         } catch (SQLException e) {
@@ -104,9 +110,9 @@ public class SolutionDao {
         }
     }
 
-    public Solution[] findAllSolutionsByUserId(int userId) {
+    public List<Solution> findAllSolutionsByUserId(int userId) {
         try (Connection connection = DBUtil.getConnection()) {
-            Solution[] found = new Solution[0];
+            List<Solution> found = new ArrayList<>();
             Solution solution = new Solution();
             PreparedStatement statement = connection.prepareStatement(FIND_ALL_SOLUTIONS_BY_USER_ID_QUERY);
             statement.setInt(1, userId);
@@ -118,7 +124,7 @@ public class SolutionDao {
                 solution.setDescription(resultSet.getString("description"));
                 solution.setExercise_id(resultSet.getInt("exercise_id"));
                 solution.setUser_id(resultSet.getInt("user_id"));
-                found = addToArray(solution, found);
+                found.add(solution);
             }
             return found;
         } catch (SQLException e) {
@@ -127,10 +133,10 @@ public class SolutionDao {
         }
     }
 
-    public Solution[] findAllSolutionsByExerciseId (int exerciseId) {
-        Solution[] found = new Solution[0];
+    public List<Solution> findAllSolutionsByExerciseId(int exerciseId) {
+        List<Solution> found = new ArrayList<>();
         Solution solution = new Solution();
-        try(Connection connection = DBUtil.getConnection()) {
+        try (Connection connection = DBUtil.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(FIND_ALL_BY_EXERCISE_ID_QUERY);
             statement.setInt(1, exerciseId);
             ResultSet resultSet = statement.executeQuery();
@@ -141,7 +147,7 @@ public class SolutionDao {
                 solution.setDescription(resultSet.getString("description"));
                 solution.setExercise_id(resultSet.getInt("exercise_id"));
                 solution.setUser_id(resultSet.getInt("user_id"));
-                found = addToArray(solution, found);
+                found.add(solution);
             }
             return found;
         } catch (SQLException throwables) {
@@ -150,21 +156,21 @@ public class SolutionDao {
         }
     }
 
-    public Solution[] findAllExercisesWithoutSolution(int userId) {
-        Solution[] solutions = new Solution[0];
+    public List<Solution> findAllExercisesWithoutSolution(int userId) {
+        List<Solution> solutions = new ArrayList<>();
         Solution solution = new Solution();
         try (Connection connection = DBUtil.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(FIND_ALL_EXERCISES_WITHOUT_SOLUTION_QUERY);
             statement.setInt(1, userId);
             ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 solution.setId(resultSet.getInt("id"));
                 solution.setCreated(resultSet.getString("created"));
                 solution.setUpdated(resultSet.getString("updated"));
                 solution.setDescription(resultSet.getString("description"));
                 solution.setExercise_id(resultSet.getInt("exercise_id"));
                 solution.setUser_id(resultSet.getInt("user_id"));
-                solutions = addToArray(solution, solutions);
+                solutions.add(solution);
             }
             return solutions;
         } catch (SQLException e) {
@@ -173,9 +179,34 @@ public class SolutionDao {
         }
     }
 
-    private Solution[] addToArray(Solution solution, Solution[] solutions) {
-        Solution[] tmpSolutions = Arrays.copyOf(solutions, solutions.length + 1);
-        tmpSolutions[solutions.length] = solution;
-        return tmpSolutions;
+//    private Solution[] addToArray(Solution solution, Solution[] solutions) {
+//        Solution[] tmpSolutions = Arrays.copyOf(solutions, solutions.length + 1);
+//        tmpSolutions[solutions.length] = solution;
+//        return tmpSolutions;
+//    }
+
+    public List<Solution> findRecent(int limit) {
+        try (Connection conn = DBUtil.getConnection()) {
+            List<Solution> solutions = new ArrayList<>();
+            PreparedStatement statement = conn.prepareStatement(FIND_RECENT_SOLUTIONS_QUERY);
+            statement.setInt(1, limit);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Solution solution = new Solution();
+                solution.setId(resultSet.getInt("id"));
+                solution.setCreated(resultSet.getString("created"));
+                solution.setUpdated(resultSet.getString("updated"));
+                solution.setDescription(resultSet.getString("description"));
+                solution.setExercise_id(resultSet.getInt("exercise_id"));
+                solution.setUser_id(resultSet.getInt("user_id"));
+                solution.setUsername(resultSet.getString("username"));
+                solution.setExerciseTitle(resultSet.getString("title"));
+                solutions.add(solution);
+            }
+            return solutions;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

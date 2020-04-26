@@ -4,7 +4,9 @@ import pl.coderslab.db.DBUtil;
 import pl.coderslab.model.Group;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class GroupDao {
     private static final String CREATE_GROUP_QUERY = "INSERT INTO `groups`(name) VALUES (?)";
@@ -67,16 +69,16 @@ public class GroupDao {
         }
     }
 
-    public Group[] findAllGroups() {
+    public List<Group> findAllGroups() {
         try (Connection conn = DBUtil.getConnection()) {
-            Group[] groups = new Group[0];
+            List<Group> groups = new ArrayList<>();
             PreparedStatement statement = conn.prepareStatement(FIND_ALL_GROUPS_QUERY);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Group group = new Group();
                 group.setId(resultSet.getInt("id"));
                 group.setName(resultSet.getString("name"));
-                groups = addToArray(group, groups);
+                groups.add(group);
             }
             return groups;
         } catch (SQLException e) {
